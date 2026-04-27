@@ -59,6 +59,8 @@
         <label>연습 모드</label>
         <select id="mode">
             <option value="all">전체 무작위</option>
+            <option value="Major Triads">Major 기본 (C, D, E...)</option>
+            <option value="Minor Triads">Minor 기본 (Cm, Dm...)</option>
             <option value="Major 7th">Major 7th</option>
             <option value="Dominant 7th">Dominant 7th</option>
             <option value="Minor 7th">Minor 7th</option>
@@ -81,19 +83,45 @@
 
 <script>
     const chordData = {
+        "Major Triads": {
+            "C": "e|-0-\nB|-1-\nG|-0-\nD|-2-\nA|-3-\nE|-x-",
+            "D": "e|-2-\nB|-3-\nG|-2-\nD|-0-\nA|-x-\nE|-x-",
+            "E": "e|-0-\nB|-0-\nG|-1-\nD|-2-\nA|-2-\nE|-0-",
+            "F": "e|-1-\nB|-1-\nG|-2-\nD|-3-\nA|-3-\nE|-1-",
+            "G": "e|-3-\nB|-0-\nG|-0-\nD|-0-\nA|-2-\nE|-3-",
+            "A": "e|-0-\nB|-2-\nG|-2-\nD|-2-\nA|-0-\nE|-x-",
+            "B": "e|-2-\nB|-4-\nG|-4-\nD|-4-\nA|-2-\nE|-x-"
+        },
+        "Minor Triads": {
+            "Cm": "e|-3-\nB|-4-\nG|-5-\nD|-5-\nA|-3-\nE|-x-",
+            "Dm": "e|-1-\nB|-3-\nG|-2-\nD|-0-\nA|-x-\nE|-x-",
+            "Em": "e|-0-\nB|-0-\nG|-0-\nD|-2-\nA|-2-\nE|-0-",
+            "Fm": "e|-1-\nB|-1-\nG|-1-\nD|-3-\nA|-3-\nE|-1-",
+            "Gm": "e|-3-\nB|-3-\nG|-3-\nD|-5-\nA|-5-\nE|-3-",
+            "Am": "e|-0-\nB|-1-\nG|-2-\nD|-2-\nA|-0-\nE|-x-",
+            "Bm": "e|-2-\nB|-3-\nG|-4-\nD|-4-\nA|-2-\nE|-x-"
+        },
         "Major 7th": {
             "Cmaj7": "e|-0-\nB|-0-\nG|-0-\nD|-2-\nA|-3-\nE|-x-",
+            "Fmaj7": "e|-0-\nB|-1-\nG|-2-\nD|-3-\nA|-x-\nE|-x-",
             "Gmaj7": "e|-2-\nB|-0-\nG|-0-\nD|-0-\nA|-2-\nE|-3-",
-            "Dmaj7": "e|-2-\nB|-2-\nG|-2-\nD|-0-\nA|-x-\nE|-x-"
+            "Dmaj7": "e|-2-\nB|-2-\nG|-2-\nD|-0-\nA|-x-\nE|-x-",
+            "Amaj7": "e|-0-\nB|-2-\nG|-1-\nD|-2-\nA|-0-\nE|-x-"
         },
         "Dominant 7th": {
             "C7": "e|-0-\nB|-1-\nG|-3-\nD|-2-\nA|-3-\nE|-x-",
+            "D7": "e|-2-\nB|-1-\nG|-2-\nD|-0-\nA|-x-\nE|-x-",
+            "E7": "e|-0-\nB|-3-\nG|-1-\nD|-0-\nA|-2-\nE|-0-",
             "G7": "e|-1-\nB|-0-\nG|-0-\nD|-0-\nA|-2-\nE|-3-",
-            "D7": "e|-2-\nB|-1-\nG|-2-\nD|-0-\nA|-x-\nE|-x-"
+            "A7": "e|-3-\nB|-2-\nG|-2-\nD|-2-\nA|-0-\nE|-x-",
+            "B7": "e|-2-\nB|-0-\nG|-2-\nD|-1-\nA|-2-\nE|-x-"
         },
         "Minor 7th": {
+            "Cm7": "e|-3-\nB|-4-\nG|-3-\nD|-5-\nA|-3-\nE|-x-",
+            "Dm7": "e|-1-\nB|-1-\nG|-2-\nD|-0-\nA|-x-\nE|-x-",
+            "Em7": "e|-0-\nB|-0-\nG|-0-\nD|-0-\nA|-2-\nE|-0-",
             "Am7": "e|-0-\nB|-1-\nG|-0-\nD|-2-\nA|-0-\nE|-x-",
-            "Dm7": "e|-1-\nB|-1-\nG|-2-\nD|-0-\nA|-x-\nE|-x-"
+            "Bm7": "e|-2-\nB|-3-\nG|-2-\nD|-4-\nA|-2-\nE|-x-"
         }
     };
 
