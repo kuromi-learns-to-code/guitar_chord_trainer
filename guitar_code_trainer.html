@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7th Chord Trainer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f7;
+            padding: 50px 20px;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .controls {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .controls label { display: block; margin-top: 10px; font-size: 14px; color: #666; }
+        .controls input, .controls select {
+            width: 100%; padding: 8px; margin-top: 5px;
+            border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 12px; margin-top: 20px;
+            background-color: #007aff; color: white; border: none;
+            border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer;
+        }
+        button:hover { background-color: #005bb5; }
+        #display-area {
+            margin-top: 30px; min-height: 200px;
+        }
+        #chord-name { font-size: 32px; font-weight: bold; margin: 0; color: #111; }
+        #diagram {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 18px; line-height: 1.2; margin-top: 20px;
+            background: #f9f9f9; padding: 15px; border-radius: 8px; display: none;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎸 Chord Mastery</h2>
+    
+    <div class="controls" id="controls">
+        <label>연습 모드</label>
+        <select id="mode">
+            <option value="all">전체 무작위</option>
+            <option value="Major 7th">Major 7th</option>
+            <option value="Dominant 7th">Dominant 7th</option>
+            <option value="Minor 7th">Minor 7th</option>
+        </select>
+
+        <label>생각할 시간 (초)</label>
+        <input type="number" id="waitTime" value="3" step="0.5">
+
+        <label>정답 확인 시간 (초)</label>
+        <input type="number" id="confTime" value="2" step="0.5">
+    </div>
+
+    <button id="startBtn" onclick="toggleTraining()">시작</button>
+
+    <div id="display-area" style="display: none;">
+        <p id="chord-name">Cmaj7</p>
+        <pre id="diagram"></pre>
+    </div>
+</div>
+
+<script>
+    const chordData = {
+        "Major 7th": {
+            "Cmaj7": "e|-0-\nB|-0-\nG|-0-\nD|-2-\nA|-3-\nE|-x-",
+            "Gmaj7": "e|-2-\nB|-0-\nG|-0-\nD|-0-\nA|-2-\nE|-3-",
+            "Dmaj7": "e|-2-\nB|-2-\nG|-2-\nD|-0-\nA|-x-\nE|-x-"
+        },
+        "Dominant 7th": {
+            "C7": "e|-0-\nB|-1-\nG|-3-\nD|-2-\nA|-3-\nE|-x-",
+            "G7": "e|-1-\nB|-0-\nG|-0-\nD|-0-\nA|-2-\nE|-3-",
+            "D7": "e|-2-\nB|-1-\nG|-2-\nD|-0-\nA|-x-\nE|-x-"
+        },
+        "Minor 7th": {
+            "Am7": "e|-0-\nB|-1-\nG|-0-\nD|-2-\nA|-0-\nE|-x-",
+            "Dm7": "e|-1-\nB|-1-\nG|-2-\nD|-0-\nA|-x-\nE|-x-"
+        }
+    };
+
+    let isRunning = false;
+    let timeoutId = null;
+    let practiceSet = [];
+
+    function toggleTraining() {
+        const btn = document.getElementById("startBtn");
+        const controls = document.getElementById("controls");
+        const display = document.getElementById("display-area");
+
+        if (isRunning) {
+            // 중지 로직
+            isRunning = false;
+            clearTimeout(timeoutId);
+            btn.innerText = "시작";
+            btn.style.backgroundColor = "#007aff";
+            controls.style.display = "block";
+            display.style.display = "none";
+        } else {
+            // 시작 로직
+            setupPracticeSet();
+            if (practiceSet.length === 0) return alert("데이터가 없습니다.");
+            
+            isRunning = true;
+            btn.innerText = "중지";
+            btn.style.backgroundColor = "#ff3b30";
+            controls.style.display = "none";
+            display.style.display = "block";
+            
+            nextChord();
+        }
+    }
+
+    function setupPracticeSet() {
+        const mode = document.getElementById("mode").value;
+        practiceSet = [];
+        
+        if (mode === "all") {
+            for (let cat in chordData) {
+                for (let chord in chordData[cat]) {
+                    practiceSet.push({ name: chord, diagram: chordData[cat][chord] });
+                }
+            }
+        } else {
+            for (let chord in chordData[mode]) {
+                practiceSet.push({ name: chord, diagram: chordData[mode][chord] });
+            }
+        }
+    }
+
+    function nextChord() {
+        if (!isRunning) return;
+
+        const waitTime = parseFloat(document.getElementById("waitTime").value) * 1000;
+        const confTime = parseFloat(document.getElementById("confTime").value) * 1000;
+        
+        // 무작위 코드 선택
+        const target = practiceSet[Math.floor(Math.random() * practiceSet.length)];
+        
+        // 문제 출제 상태
+        document.getElementById("chord-name").innerText = target.name;
+        document.getElementById("diagram").style.display = "none";
+
+        // 생각할 시간 후 정답 표시
+        timeoutId = setTimeout(() => {
+            if (!isRunning) return;
+            document.getElementById("diagram").innerText = target.diagram;
+            document.getElementById("diagram").style.display = "block";
+
+            // 정답 확인 시간 후 다음 코드로
+            timeoutId = setTimeout(nextChord, confTime);
+        }, waitTime);
+    }
+</script>
+</body>
+</html>
