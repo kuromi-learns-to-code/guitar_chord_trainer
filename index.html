@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎸Chord Trainer</title>
+    <title>Chord Mastery - Custom Trainer</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -20,18 +20,43 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
         }
         .controls {
             margin-bottom: 20px;
             text-align: left;
         }
-        .controls label { display: block; margin-top: 10px; font-size: 14px; color: #666; }
-        .controls input, .controls select {
+        .controls label { display: block; margin-top: 10px; font-size: 14px; color: #666; font-weight: bold; }
+        .controls input[type="number"], .controls select {
             width: 100%; padding: 8px; margin-top: 5px;
             border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+            font-size: 15px;
         }
+        
+        /* 커스텀 선택 영역 스타일 */
+        #custom-area {
+            margin-top: 15px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            display: none; /* 초기에는 숨김 */
+        }
+        .category-title {
+            font-size: 13px; font-weight: bold; color: #444;
+            margin: 10px 0 5px 0; border-bottom: 1px solid #eee; padding-bottom: 3px;
+        }
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 8px;
+        }
+        .checkbox-grid label {
+            margin-top: 0; font-size: 13px; color: #333; font-weight: normal;
+            display: flex; align-items: center; gap: 4px; cursor: pointer;
+        }
+
         button {
             width: 100%; padding: 12px; margin-top: 20px;
             background-color: #007aff; color: white; border: none;
@@ -41,7 +66,7 @@
         #display-area {
             margin-top: 30px; min-height: 200px;
         }
-        #chord-name { font-size: 32px; font-weight: bold; margin: 0; color: #111; }
+        #chord-name { font-size: 36px; font-weight: bold; margin: 0; color: #111; }
         #diagram {
             font-family: "Courier New", Courier, monospace;
             font-size: 18px; line-height: 1.2; margin-top: 20px;
@@ -57,14 +82,20 @@
     
     <div class="controls" id="controls">
         <label>연습 모드</label>
-        <select id="mode">
+        <select id="mode" onchange="toggleCustomUI()">
             <option value="all">전체 무작위</option>
             <option value="Major Triads">Major 기본 (C, D, E...)</option>
             <option value="Minor Triads">Minor 기본 (Cm, Dm...)</option>
             <option value="Major 7th">Major 7th</option>
             <option value="Dominant 7th">Dominant 7th</option>
             <option value="Minor 7th">Minor 7th</option>
+            <option value="custom">🛠 사용자 지정 (직접 선택)</option>
         </select>
+
+        <div id="custom-area">
+            <div style="font-size: 12px; color: #888; margin-bottom: 10px;">연습할 코드를 선택하세요:</div>
+            <div id="checkbox-container"></div>
+        </div>
 
         <label>생각할 시간 (초)</label>
         <input type="number" id="waitTime" value="3" step="0.5">
@@ -129,6 +160,32 @@
     let timeoutId = null;
     let practiceSet = [];
 
+    // 페이지 로드 시 체크박스 UI 동적 생성
+    window.onload = function() {
+        const container = document.getElementById("checkbox-container");
+        let html = "";
+        for (let cat in chordData) {
+            html += `<div class="category-title">${cat}</div>`;
+            html += `<div class="checkbox-grid">`;
+            for (let chord in chordData[cat]) {
+                html += `<label><input type="checkbox" value="${chord}" data-category="${cat}"> ${chord}</label>`;
+            }
+            html += `</div>`;
+        }
+        container.innerHTML = html;
+    };
+
+    // '사용자 지정' 선택 시에만 체크박스 영역 보이기
+    function toggleCustomUI() {
+        const mode = document.getElementById("mode").value;
+        const customArea = document.getElementById("custom-area");
+        if (mode === "custom") {
+            customArea.style.display = "block";
+        } else {
+            customArea.style.display = "none";
+        }
+    }
+
     function toggleTraining() {
         const btn = document.getElementById("startBtn");
         const controls = document.getElementById("controls");
@@ -145,7 +202,10 @@
         } else {
             // 시작 로직
             setupPracticeSet();
-            if (practiceSet.length === 0) return alert("데이터가 없습니다.");
+            if (practiceSet.length === 0) {
+                alert("연습할 코드가 선택되지 않았습니다.");
+                return;
+            }
             
             isRunning = true;
             btn.innerText = "중지";
@@ -161,13 +221,23 @@
         const mode = document.getElementById("mode").value;
         practiceSet = [];
         
-        if (mode === "all") {
+        if (mode === "custom") {
+            // 체크된 박스만 수집
+            const checkboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                const chordName = cb.value;
+                const catName = cb.getAttribute("data-category");
+                practiceSet.push({ name: chordName, diagram: chordData[catName][chordName] });
+            });
+        } else if (mode === "all") {
+            // 전체 무작위
             for (let cat in chordData) {
                 for (let chord in chordData[cat]) {
                     practiceSet.push({ name: chord, diagram: chordData[cat][chord] });
                 }
             }
         } else {
+            // 특정 카테고리 (Major Triads 등)
             for (let chord in chordData[mode]) {
                 practiceSet.push({ name: chord, diagram: chordData[mode][chord] });
             }
