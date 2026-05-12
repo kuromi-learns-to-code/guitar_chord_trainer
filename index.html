@@ -22,6 +22,7 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
+            position: relative; /* 워터마크 배치를 위해 추가 */
         }
         .controls {
             margin-bottom: 20px;
@@ -43,7 +44,6 @@
             display: none;
         }
 
-        /* 카테고리 헤더 스타일 업데이트 */
         .category-header {
             display: flex;
             align-items: center;
@@ -84,6 +84,17 @@
             font-size: 18px; line-height: 1.2; margin-top: 20px;
             background: #f9f9f9; padding: 15px; border-radius: 8px; display: none;
             white-space: pre-wrap;
+        }
+
+        /* 워터마크 스타일 추가 */
+        .watermark {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #d1d1d6; /* 연한 회색 */
+            font-style: italic;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #f2f2f7;
+            padding-top: 15px;
         }
     </style>
 </head>
@@ -128,9 +139,13 @@
         <p id="chord-name">Cmaj7</p>
         <pre id="diagram"></pre>
     </div>
+
+    <!-- 하단 워터마크 추가 -->
+    <div class="watermark">© kuromi learns to code</div>
 </div>
 
 <script>
+    // ... (기존 script 로직 동일) ...
     const chordData = {
         "Major Triads": { "C": "e|-0-\nB|-1-\nG|-0-\nD|-2-\nA|-3-\nE|-x-", "D": "e|-2-\nB|-3-\nG|-2-\nD|-0-\nA|-x-\nE|-x-", "E": "e|-0-\nB|-0-\nG|-1-\nD|-2-\nA|-2-\nE|-0-", "F": "e|-1-\nB|-1-\nG|-2-\nD|-3-\nA|-3-\nE|-1-", "G": "e|-3-\nB|-0-\nG|-0-\nD|-0-\nA|-2-\nE|-3-", "A": "e|-0-\nB|-2-\nG|-2-\nD|-2-\nA|-0-\nE|-x-", "B": "e|-2-\nB|-4-\nG|-4-\nD|-4-\nA|-2-\nE|-x-" },
         "Minor Triads": { "Cm": "e|-3-\nB|-4-\nG|-5-\nD|-5-\nA|-3-\nE|-x-", "Dm": "e|-1-\nB|-3-\nG|-2-\nD|-0-\nA|-x-\nE|-x-", "Em": "e|-0-\nB|-0-\nG|-0-\nD|-2-\nA|-2-\nE|-0-", "Fm": "e|-1-\nB|-1-\nG|-1-\nD|-3-\nA|-3-\nE|-1-", "Gm": "e|-3-\nB|-3-\nG|-3-\nD|-5-\nA|-5-\nE|-3-", "Am": "e|-0-\nB|-1-\nG|-2-\nD|-2-\nA|-0-\nE|-x-", "Bm": "e|-2-\nB|-3-\nG|-4-\nD|-4-\nA|-2-\nE|-x-" },
@@ -153,7 +168,6 @@
         const container = document.getElementById("checkbox-container");
         let html = "";
         for (let cat in chordData) {
-            // 카테고리 전체 선택 체크박스 추가
             html += `
             <div class="category-header">
                 <input type="checkbox" class="category-checkbox" onchange="toggleCategory(this, '${cat}')">
@@ -168,7 +182,6 @@
         container.innerHTML = html;
     };
 
-    // 카테고리 전체 선택 로직
     function toggleCategory(masterSource, catName) {
         const checkboxes = document.querySelectorAll(`input[data-category="${catName}"]`);
         checkboxes.forEach(cb => {
